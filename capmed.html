@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAP-MED-V3 | Micro Robotic Fat Elimination</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #050a14;
+    --surface: #0d1626;
+    --surface2: #111d35;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0f4ff;
+    --sub: rgba(240,244,255,0.55);
+    --accent: #3d9eff;
+    --accent2: #00e5b0;
+    --accent3: #ff5e87;
+    --glow: rgba(61,158,255,0.3);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 48px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(61,158,255,0.15) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 40% at 80% 20%, rgba(0,229,176,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .pill-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(61,158,255,0.12);
+    border: 1px solid rgba(61,158,255,0.3);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    margin-bottom: 32px;
+  }
+  .pill-badge span { width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;animation:pulse 2s infinite; }
+
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50% { opacity:0.4; transform:scale(0.7); }
+  }
+
+  h1 {
+    font-size: clamp(40px, 8vw, 88px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, #fff 30%, var(--accent) 70%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: clamp(16px, 2vw, 20px);
+    color: var(--sub);
+    max-width: 600px;
+    line-height: 1.6;
+    margin-bottom: 48px;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 14px 32px;
+    border-radius: 100px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 32px rgba(61,158,255,0.4);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 48px rgba(61,158,255,0.6); }
+
+  /* floating capsule */
+  .capsule-hero {
+    margin-top: 64px;
+    width: 120px;
+    height: 120px;
+    position: relative;
+    animation: float 4s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-16px); }
+  }
+
+  /* ── SECTION BASE ── */
+  section { padding: 96px 24px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 800; line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+  .section-sub {
+    font-size: 17px; color: var(--sub);
+    max-width: 560px; line-height: 1.65;
+    margin-bottom: 64px;
+  }
+
+  /* ── PROBLEM ── */
+  .problem { background: var(--bg); }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    margin-bottom: 64px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .stat-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+  .stat-num {
+    font-size: 42px; font-weight: 900;
+    background: linear-gradient(135deg, var(--accent3), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .stat-desc { font-size: 14px; color: var(--sub); line-height: 1.5; }
+
+  /* ── MECHANISM VISUALIZER ── */
+  .mechanism { background: var(--surface); }
+
+  .steps-nav {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 48px;
+  }
+  .step-btn {
+    padding: 8px 20px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--sub);
+    font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .step-btn.active, .step-btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .mechanism-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  @media (max-width: 700px) { .mechanism-layout { grid-template-columns: 1fr; } }
+
+  .viz-canvas {
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 440px;
+    background: var(--bg);
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .step-content { opacity: 0; transform: translateY(12px); transition: opacity 0.4s, transform 0.4s; }
+  .step-content.active { opacity: 1; transform: translateY(0); }
+
+  .step-number {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .step-title {
+    font-size: 28px; font-weight: 800; line-height: 1.2;
+    margin-bottom: 16px; letter-spacing: -0.02em;
+  }
+  .step-body { font-size: 15px; color: var(--sub); line-height: 1.7; }
+
+  .step-features { list-style: none; margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
+  .step-features li {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 14px; color: var(--sub);
+  }
+  .step-features li::before {
+    content: '';
+    flex-shrink: 0;
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    background: rgba(61,158,255,0.15);
+    border: 1px solid rgba(61,158,255,0.3);
+    margin-top: 1px;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='9' viewBox='0 0 12 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 4.5L4.5 8L11 1' stroke='%233d9eff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  /* ── COMPONENTS ── */
+  .components { background: var(--bg); }
+  .comp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  .comp-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .comp-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+  .comp-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .comp-card.blue::before { background: linear-gradient(90deg, var(--accent), transparent); }
+  .comp-card.green::before { background: linear-gradient(90deg, var(--accent2), transparent); }
+  .comp-card.pink::before { background: linear-gradient(90deg, var(--accent3), transparent); }
+
+  .comp-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+  .comp-icon.blue { background: rgba(61,158,255,0.12); }
+  .comp-icon.green { background: rgba(0,229,176,0.12); }
+  .comp-icon.pink { background: rgba(255,94,135,0.12); }
+  .comp-name { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+  .comp-desc { font-size: 14px; color: var(--sub); line-height: 1.6; }
+
+  /* ── PROCESS FLOW ── */
+  .process { background: var(--surface); }
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .flow::before {
+    content: '';
+    position: absolute;
+    left: 23px; top: 24px; bottom: 24px;
+    width: 2px;
+    background: linear-gradient(180deg, var(--accent), var(--accent2), var(--accent3));
+    opacity: 0.4;
+  }
+  .flow-item {
+    display: flex; gap: 24px;
+    padding: 24px 0;
+    animation: slideIn 0.6s ease backwards;
+  }
+  .flow-item:nth-child(1) { animation-delay: 0s; }
+  .flow-item:nth-child(2) { animation-delay: 0.1s; }
+  .flow-item:nth-child(3) { animation-delay: 0.2s; }
+  .flow-item:nth-child(4) { animation-delay: 0.3s; }
+  .flow-item:nth-child(5) { animation-delay: 0.4s; }
+
+  @keyframes slideIn {
+    from { opacity:0; transform: translateX(-20px); }
+    to { opacity:1; transform: translateX(0); }
+  }
+
+  .flow-dot {
+    flex-shrink: 0;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 2px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    position: relative; z-index: 1;
+  }
+  .flow-text { padding-top: 8px; }
+  .flow-label { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .flow-desc { font-size: 14px; color: var(--sub); line-height: 1.6; }
+
+  /* ── OUTPUT ── */
+  .output-section { background: var(--bg); }
+  .output-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+  }
+  .output-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 24px;
+    text-align: center;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .output-card:hover { transform: translateY(-4px); border-color: var(--accent2); }
+  .output-emoji { font-size: 36px; margin-bottom: 16px; }
+  .output-label { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .output-desc { font-size: 13px; color: var(--sub); line-height: 1.5; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--sub);
+  }
+
+  /* ── SVG ANIMATIONS ── */
+  #viz-svg { width: 100%; height: 100%; }
+
+  .capsule-body { animation: capsuleGlow 2s ease-in-out infinite alternate; }
+  @keyframes capsuleGlow {
+    from { filter: drop-shadow(0 0 8px rgba(61,158,255,0.4)); }
+    to { filter: drop-shadow(0 0 20px rgba(61,158,255,0.8)); }
+  }
+
+  .scan-line { animation: scan 2.5s ease-in-out infinite; }
+  @keyframes scan {
+    0% { transform: translateY(-60px); opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: translateY(60px); opacity: 0; }
+  }
+
+  .particle { animation: particleFly 3s ease-in-out infinite; }
+  .particle:nth-child(2) { animation-delay: 0.5s; }
+  .particle:nth-child(3) { animation-delay: 1s; }
+  .particle:nth-child(4) { animation-delay: 1.5s; }
+  .particle:nth-child(5) { animation-delay: 2s; }
+
+  @keyframes particleFly {
+    0% { transform: translate(0,0); opacity:0; }
+    20% { opacity:1; }
+    100% { transform: translate(var(--dx), var(--dy)); opacity:0; }
+  }
+
+  .energy-ring { animation: ringPulse 1.5s ease-out infinite; }
+  .energy-ring:nth-child(2) { animation-delay: 0.5s; }
+  .energy-ring:nth-child(3) { animation-delay: 1s; }
+  @keyframes ringPulse {
+    0% { r: 20; opacity: 0.8; }
+    100% { r: 80; opacity: 0; }
+  }
+
+  .inject-drop { animation: dropFall 1.5s ease-in infinite; }
+  .inject-drop:nth-child(2) { animation-delay: 0.4s; }
+  .inject-drop:nth-child(3) { animation-delay: 0.8s; }
+  @keyframes dropFall {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(40px); opacity: 0; }
+  }
+
+  .fat-shrink { animation: shrinkFat 3s ease-in-out infinite alternate; }
+  @keyframes shrinkFat {
+    from { transform: scale(1); opacity: 0.8; }
+    to { transform: scale(0.3); opacity: 0; }
+  }
+
+  .co2-bubble { animation: bubbleRise 2s ease-in infinite; }
+  .co2-bubble:nth-child(2) { animation-delay: 0.6s; }
+  .co2-bubble:nth-child(3) { animation-delay: 1.2s; }
+  @keyframes bubbleRise {
+    0% { transform: translateY(0) scale(1); opacity: 0.7; }
+    100% { transform: translateY(-80px) scale(0.3); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ───── HERO ───── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="pill-badge"><span></span>Next-Gen Biomedical Technology</div>
+  <h1>CAP-MED-V3</h1>
+  <p class="hero-sub">A micro-scale robotic capsule that dissolves fat from inside your body — no surgery, no cutting, no harm to healthy tissue.</p>
+  <a href="#mechanism" class="btn-primary">Explore the Mechanism ↓</a>
+
+  <!-- Animated capsule SVG -->
+  <div class="capsule-hero">
+    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="60" cy="60" r="58" fill="rgba(61,158,255,0.06)" stroke="rgba(61,158,255,0.2)" stroke-width="1"/>
+      <circle cx="60" cy="60" r="42" fill="rgba(61,158,255,0.08)" stroke="rgba(61,158,255,0.3)" stroke-width="1"/>
+      <!-- capsule body -->
+      <rect x="30" y="48" width="60" height="24" rx="12" fill="rgba(61,158,255,0.8)" class="capsule-body"/>
+      <rect x="30" y="48" width="30" height="24" rx="12" fill="rgba(0,229,176,0.9)"/>
+      <!-- lens dot -->
+      <circle cx="50" cy="60" r="5" fill="white" opacity="0.9"/>
+      <circle cx="50" cy="60" r="2.5" fill="#050a14"/>
+      <!-- injector -->
+      <line x1="75" y1="66" x2="75" y2="78" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="75" cy="79" r="2" fill="rgba(255,229,0,0.9)"/>
+      <!-- energy receiver -->
+      <path d="M85 55 Q90 60 85 65" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M88 52 Q95 60 88 68" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ───── PROBLEM ───── -->
+<section class="problem">
+  <div class="container">
+    <div class="section-label">The Problem</div>
+    <h2 class="section-title">Obesity is a global crisis</h2>
+    <p class="section-sub">A complex chronic disease driven by genetics, diet, and environment — with no safe, targeted solution. Until now.</p>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-num">2×</div>
+        <div class="stat-desc">Global obesity rates have more than doubled in the last three decades</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">3+</div>
+        <div class="stat-desc">Major diseases linked to obesity — T2 diabetes, cardiovascular disease, sleep apnea</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">↑</div>
+        <div class="stat-desc">Cancer risk is significantly elevated by chronic obesity</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">0</div>
+        <div class="stat-desc">Existing non-surgical solutions that target fat with zero tissue damage</div>
+      </div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;">
+      <p style="font-size:18px;font-weight:600;line-height:1.6;color:var(--text);">"What if we could treat obesity by <span style="color:var(--accent)">burning the fat inside the body</span> without harming tissues and cells — just by swallowing a capsule?"</p>
+      <p style="margin-top:12px;font-size:14px;color:var(--sub)">— CAP-MED-V3 Research Vision</p>
+    </div>
+  </div>
+</section>
+
+<!-- ───── MECHANISM ───── -->
+<section class="mechanism" id="mechanism">
+  <div class="container">
+    <div class="section-label">Interactive Mechanism</div>
+    <h2 class="section-title">How it works</h2>
+    <p class="section-sub">Step through the capsule's four-stage process — from detection to fat elimination.</p>
+
+    <div class="steps-nav">
+      <button class="step-btn active" onclick="showStep(0)">1. Swallow</button>
+      <button class="step-btn" onclick="showStep(1)">2. Detect</button>
+      <button class="step-btn" onclick="showStep(2)">3. Power</button>
+      <button class="step-btn" onclick="showStep(3)">4. Inject</button>
+      <button class="step-btn" onclick="showStep(4)">5. Burn</button>
+    </div>
+
+    <div class="mechanism-layout">
+      <div class="viz-canvas">
+        <svg id="viz-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+          <!-- background grid -->
+          <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+            </pattern>
+            <radialGradient id="bodyGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="rgba(61,158,255,0.15)"/>
+              <stop offset="100%" stop-color="transparent"/>
+            </radialGradient>
+          </defs>
+          <rect width="400" height="400" fill="url(#grid)"/>
+          <circle cx="200" cy="200" r="180" fill="url(#bodyGrad)"/>
+          
+          <!-- STEP 0: swallow - capsule traveling down -->
+          <g id="step0">
+            <!-- throat outline -->
+            <ellipse cx="200" cy="80" rx="30" ry="15" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+            <rect x="170" y="80" width="60" height="200" rx="8" fill="rgba(255,100,100,0.06)" stroke="rgba(255,100,100,0.1)" stroke-width="1"/>
+            <!-- capsule going down -->
+            <g style="animation: capsuleDrop 3s ease-in-out infinite;">
+              <rect x="185" y="100" width="30" height="12" rx="6" fill="rgba(61,158,255,0.9)"/>
+              <rect x="185" y="100" width="15" height="12" rx="6" fill="rgba(0,229,176,0.9)"/>
+              <!-- glow trail -->
+              <rect x="187" y="89" width="26" height="8" rx="4" fill="rgba(61,158,255,0.3)"/>
+              <rect x="189" y="81" width="22" height="6" rx="3" fill="rgba(61,158,255,0.15)"/>
+            </g>
+            <!-- stomach -->
+            <ellipse cx="200" cy="300" rx="70" ry="55" fill="rgba(255,150,100,0.08)" stroke="rgba(255,150,100,0.2)" stroke-width="1.5"/>
+            <text x="200" y="304" fill="rgba(255,150,100,0.5)" text-anchor="middle" font-size="11" font-family="Inter">Stomach</text>
+          </g>
+
+          <!-- STEP 1: detect -->
+          <g id="step1" style="display:none">
+            <!-- fat cluster -->
+            <ellipse cx="250" cy="200" rx="55" ry="45" fill="rgba(255,220,80,0.15)" stroke="rgba(255,220,80,0.3)" stroke-width="1.5"/>
+            <ellipse cx="240" cy="195" rx="35" ry="28" fill="rgba(255,200,60,0.2)" stroke="rgba(255,200,60,0.3)" stroke-width="1"/>
+            <text x="250" y="200" fill="rgba(255,220,80,0.8)" text-anchor="middle" font-size="12" font-family="Inter" font-weight="600">Fat Cluster</text>
+            <!-- capsule with lens -->
+            <rect x="120" y="192" width="60" height="24" rx="12" fill="rgba(61,158,255,0.8)"/>
+            <rect x="120" y="192" width="30" height="24" rx="12" fill="rgba(0,229,176,0.9)"/>
+            <!-- optical lens scanning -->
+            <circle cx="140" cy="204" r="8" fill="white" opacity="0.9"/>
+            <circle cx="140" cy="204" r="4" fill="#050a14"/>
+            <!-- scan beam -->
+            <path d="M148 204 L240 190" stroke="rgba(61,158,255,0.8)" stroke-width="2" stroke-dasharray="4 4">
+              <animateTransform attributeName="transform" type="rotate" from="-5 148 204" to="5 148 204" dur="1.5s" repeatCount="indefinite" additive="sum"/>
+            </path>
+            <path d="M148 204 L245 210" stroke="rgba(61,158,255,0.5)" stroke-width="1.5" stroke-dasharray="4 4">
+              <animateTransform attributeName="transform" type="rotate" from="5 148 204" to="-5 148 204" dur="1.5s" repeatCount="indefinite" additive="sum"/>
+            </path>
+            <!-- scan line on fat -->
+            <line x1="200" y1="165" x2="295" y2="165" stroke="rgba(61,158,255,0.6)" stroke-width="1.5">
+              <animate attributeName="y1" values="165;240;165" dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="y2" values="165;240;165" dur="2s" repeatCount="indefinite"/>
+            </line>
+            <text x="140" y="240" fill="var(--accent)" text-anchor="middle" font-size="10" font-family="Inter">Optical Lens Active</text>
+          </g>
+
+          <!-- STEP 2: wireless power -->
+          <g id="step2" style="display:none">
+            <!-- external emitter -->
+            <rect x="20" y="160" width="60" height="80" rx="12" fill="var(--surface2)" stroke="rgba(0,229,176,0.5)" stroke-width="2"/>
+            <text x="50" y="195" fill="rgba(0,229,176,0.8)" text-anchor="middle" font-size="9" font-family="Inter" font-weight="600">NIR /</text>
+            <text x="50" y="208" fill="rgba(0,229,176,0.8)" text-anchor="middle" font-size="9" font-family="Inter" font-weight="600">Ultrasound</text>
+            <text x="50" y="221" fill="rgba(0,229,176,0.8)" text-anchor="middle" font-size="9" font-family="Inter" font-weight="600">Emitter</text>
+            <!-- energy waves -->
+            <path d="M80 200 Q100 180 120 200" stroke="rgba(0,229,176,0.9)" stroke-width="2" fill="none">
+              <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite"/>
+            </path>
+            <path d="M95 200 Q115 175 135 200" stroke="rgba(0,229,176,0.7)" stroke-width="2" fill="none">
+              <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" repeatCount="indefinite"/>
+            </path>
+            <path d="M110 200 Q130 170 150 200" stroke="rgba(0,229,176,0.5)" stroke-width="2" fill="none">
+              <animate attributeName="opacity" values="0.6;0.2;0.6" dur="1s" repeatCount="indefinite"/>
+            </path>
+            <!-- capsule powered up -->
+            <rect x="155" y="188" width="80" height="24" rx="12" fill="rgba(61,158,255,0.8)"/>
+            <rect x="155" y="188" width="40" height="24" rx="12" fill="rgba(0,229,176,0.9)"/>
+            <!-- energy receiver arcs -->
+            <path d="M235 195 Q248 200 235 205" stroke="rgba(255,255,255,0.9)" stroke-width="2" fill="none"/>
+            <path d="M238 191 Q255 200 238 209" stroke="rgba(255,255,255,0.6)" stroke-width="2" fill="none"/>
+            <path d="M241 187 Q262 200 241 213" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none"/>
+            <!-- glow -->
+            <circle cx="195" cy="200" r="50" fill="none" stroke="rgba(0,229,176,0.2)" stroke-width="1">
+              <animate attributeName="r" values="40;60;40" dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.8;0.1;0.8" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <text x="195" y="235" fill="var(--accent2)" text-anchor="middle" font-size="10" font-family="Inter">Powered Wirelessly — No Battery</text>
+          </g>
+
+          <!-- STEP 3: inject -->
+          <g id="step3" style="display:none">
+            <!-- fat cells -->
+            <circle cx="280" cy="180" r="35" fill="rgba(255,200,60,0.15)" stroke="rgba(255,200,60,0.4)" stroke-width="1.5"/>
+            <circle cx="310" cy="220" r="25" fill="rgba(255,200,60,0.12)" stroke="rgba(255,200,60,0.3)" stroke-width="1"/>
+            <circle cx="260" cy="240" r="20" fill="rgba(255,200,60,0.1)" stroke="rgba(255,200,60,0.25)" stroke-width="1"/>
+            <text x="280" y="185" fill="rgba(255,200,60,0.7)" text-anchor="middle" font-size="10" font-family="Inter">Fat Cell</text>
+            <!-- capsule -->
+            <rect x="120" y="188" width="80" height="24" rx="12" fill="rgba(61,158,255,0.8)"/>
+            <rect x="120" y="188" width="40" height="24" rx="12" fill="rgba(0,229,176,0.9)"/>
+            <!-- injector needle -->
+            <line x1="200" y1="208" x2="200" y2="240" stroke="rgba(255,255,200,0.9)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M196 238 L200 246 L204 238" fill="rgba(255,255,200,0.9)"/>
+            <!-- reagent drops -->
+            <circle cx="200" cy="248" r="4" fill="rgba(0,229,176,0.9)">
+              <animate attributeName="cy" values="248;280;310" dur="1s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="1;0.5;0" dur="1s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="200" cy="248" r="4" fill="rgba(0,229,176,0.9)">
+              <animate attributeName="cy" values="248;280;310" dur="1s" begin="0.3s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="1;0.5;0" dur="1s" begin="0.3s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="200" cy="248" r="4" fill="rgba(0,229,176,0.9)">
+              <animate attributeName="cy" values="248;280;310" dur="1s" begin="0.6s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="1;0.5;0" dur="1s" begin="0.6s" repeatCount="indefinite"/>
+            </circle>
+            <text x="200" y="170" fill="var(--accent2)" text-anchor="middle" font-size="10" font-family="Inter">Micro-Injector Delivering Reagent</text>
+          </g>
+
+          <!-- STEP 4: burn -->
+          <g id="step4" style="display:none">
+            <!-- fat cell shrinking -->
+            <circle cx="200" cy="200" r="60" fill="rgba(255,200,60,0.15)" stroke="rgba(255,200,60,0.4)" stroke-width="2">
+              <animate attributeName="r" values="60;10;60" dur="4s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.8;0.1;0.8" dur="4s" repeatCount="indefinite"/>
+            </circle>
+            <!-- CO2 bubbles rising -->
+            <circle cx="190" cy="195" r="6" fill="rgba(150,150,255,0.4)" stroke="rgba(150,150,255,0.6)" stroke-width="1">
+              <animate attributeName="cy" values="195;100;195" dur="2.5s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.8;0;0.8" dur="2.5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="205" cy="210" r="4" fill="rgba(150,150,255,0.4)" stroke="rgba(150,150,255,0.6)" stroke-width="1">
+              <animate attributeName="cy" values="210;120;210" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.8;0;0.8" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="215" cy="200" r="5" fill="rgba(150,150,255,0.4)" stroke="rgba(150,150,255,0.6)" stroke-width="1">
+              <animate attributeName="cy" values="200;90;200" dur="3s" begin="1s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.8;0;0.8" dur="3s" begin="1s" repeatCount="indefinite"/>
+            </circle>
+            <!-- water drops -->
+            <ellipse cx="175" cy="230" rx="5" ry="7" fill="rgba(61,158,255,0.6)">
+              <animate attributeName="cy" values="200;270;200" dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.7;0;0.7" dur="2s" repeatCount="indefinite"/>
+            </ellipse>
+            <ellipse cx="225" cy="220" rx="4" ry="6" fill="rgba(61,158,255,0.6)">
+              <animate attributeName="cy" values="210;280;210" dur="2s" begin="0.7s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.7;0;0.7" dur="2s" begin="0.7s" repeatCount="indefinite"/>
+            </ellipse>
+            <!-- healthy cells preserved -->
+            <circle cx="110" cy="150" r="22" fill="rgba(0,229,176,0.08)" stroke="rgba(0,229,176,0.4)" stroke-width="1.5"/>
+            <text x="110" y="155" fill="rgba(0,229,176,0.8)" text-anchor="middle" font-size="9" font-family="Inter">Healthy</text>
+            <circle cx="300" cy="150" r="22" fill="rgba(0,229,176,0.08)" stroke="rgba(0,229,176,0.4)" stroke-width="1.5"/>
+            <text x="300" y="155" fill="rgba(0,229,176,0.8)" text-anchor="middle" font-size="9" font-family="Inter">Healthy</text>
+            <circle cx="110" cy="280" r="22" fill="rgba(0,229,176,0.08)" stroke="rgba(0,229,176,0.4)" stroke-width="1.5"/>
+            <text x="110" y="285" fill="rgba(0,229,176,0.8)" text-anchor="middle" font-size="9" font-family="Inter">Healthy</text>
+            <circle cx="300" cy="280" r="22" fill="rgba(0,229,176,0.08)" stroke="rgba(0,229,176,0.4)" stroke-width="1.5"/>
+            <text x="300" y="285" fill="rgba(0,229,176,0.8)" text-anchor="middle" font-size="9" font-family="Inter">Healthy</text>
+            <!-- labels -->
+            <text x="200" y="340" fill="rgba(150,150,255,0.8)" text-anchor="middle" font-size="10" font-family="Inter">CO₂ + H₂O + ATP Released</text>
+            <text x="200" y="356" fill="rgba(0,229,176,0.7)" text-anchor="middle" font-size="10" font-family="Inter">Surrounding cells unharmed ✓</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Step text panels -->
+      <div style="position:relative;min-height:320px;">
+        <div class="step-content active" id="sc0">
+          <div class="step-number">Step 01 of 05</div>
+          <div class="step-title">Swallow the Capsule</div>
+          <div class="step-body">CAP-MED-V3 is ingested like any standard oral capsule. Its biocompatible shell navigates the digestive system and localises near fat tissue deposits.</div>
+          <ul class="step-features">
+            <li>Biocompatible outer shell — safe for ingestion</li>
+            <li>Micro-scale design — travels naturally through the body</li>
+            <li>No anaesthesia or surgical preparation needed</li>
+          </ul>
+        </div>
+        <div class="step-content" id="sc1" style="position:absolute;top:0;left:0;right:0;">
+          <div class="step-number">Step 02 of 05</div>
+          <div class="step-title">Detect Fat Deposits</div>
+          <div class="step-body">Onboard optical lenses scan surrounding tissue in real-time to precisely identify and map fat cell clusters, ensuring only targeted fat is treated.</div>
+          <ul class="step-features">
+            <li>High-resolution optical lens array</li>
+            <li>Real-time fat cluster mapping</li>
+            <li>Zero healthy tissue interference</li>
+          </ul>
+        </div>
+        <div class="step-content" id="sc2" style="position:absolute;top:0;left:0;right:0;">
+          <div class="step-number">Step 03 of 05</div>
+          <div class="step-title">Wireless Power Activation</div>
+          <div class="step-body">Energy receptors on the capsule capture wirelessly transmitted near-infrared light or ultrasound signals from an external wearable device — no internal battery required.</div>
+          <ul class="step-features">
+            <li>NIR light or ultrasound energy capture</li>
+            <li>Deep-tissue penetrating wireless power</li>
+            <li>No internal battery — fully wireless operation</li>
+          </ul>
+        </div>
+        <div class="step-content" id="sc3" style="position:absolute;top:0;left:0;right:0;">
+          <div class="step-number">Step 04 of 05</div>
+          <div class="step-title">Inject Biochemical Reagents</div>
+          <div class="step-body">MEMS micro-injectors release precisely measured doses of non-destructive enzymatic agents into targeted fat cell clusters, stimulating intracellular fat metabolism.</div>
+          <ul class="step-features">
+            <li>MEMS micro-injectors for precision dosing</li>
+            <li>Non-destructive biochemical reagents</li>
+            <li>Triggers cellular fat breakdown — not cell lysis</li>
+          </ul>
+        </div>
+        <div class="step-content" id="sc4" style="position:absolute;top:0;left:0;right:0;">
+          <div class="step-number">Step 05 of 05</div>
+          <div class="step-title">Fat Burns — Body Stays Safe</div>
+          <div class="step-body">The biochemical reaction converts fat into CO₂, water, and ATP energy. Healthy muscle, nerve, and surrounding tissue remain completely unharmed throughout the process.</div>
+          <ul class="step-features">
+            <li>Fat → CO₂ + H₂O + ATP (natural metabolic byproducts)</li>
+            <li>Zero damage to nerves, muscle, or surrounding cells</li>
+            <li>No surgical cutting — fully non-invasive</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── COMPONENTS ───── -->
+<section class="components">
+  <div class="container">
+    <div class="section-label">Technology Inside</div>
+    <h2 class="section-title">Three core systems</h2>
+    <p class="section-sub">Each component is purpose-built and works in concert to deliver safe, targeted fat elimination.</p>
+    <div class="comp-grid">
+      <div class="comp-card blue">
+        <div class="comp-icon blue">🔬</div>
+        <div class="comp-name">Optical Detection System</div>
+        <div class="comp-desc">Miniaturised optical lenses continuously scan tissue to detect fat density, generating a real-time map of target zones and ensuring no healthy cells are treated.</div>
+      </div>
+      <div class="comp-card green">
+        <div class="comp-icon green">⚡</div>
+        <div class="comp-name">Wireless Energy Receiver</div>
+        <div class="comp-desc">Advanced energy harvesting antennas capture deep-tissue-penetrating near-infrared light or ultrasound from an external emitter, powering the capsule's full operation with zero internal battery.</div>
+      </div>
+      <div class="comp-card pink">
+        <div class="comp-icon pink">💉</div>
+        <div class="comp-name">MEMS Micro-Injectors</div>
+        <div class="comp-desc">Micro-Electro-Mechanical Systems injectors deliver measured doses of enzymatic agents into fat reservoirs, triggering intracellular metabolism that converts fat to CO₂, water, and ATP.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── PROCESS ───── -->
+<section class="process">
+  <div class="container">
+    <div class="section-label">Development Roadmap</div>
+    <h2 class="section-title">From concept to clinic</h2>
+    <p class="section-sub">A rigorous multi-stage validation process ensures the technology is safe and effective before human trials.</p>
+    <div class="flow">
+      <div class="flow-item">
+        <div class="flow-dot">🧪</div>
+        <div class="flow-text">
+          <div class="flow-label">Capsule Shell Fabrication</div>
+          <div class="flow-desc">Biocompatible shell with embedded MEMS micro-injectors fabricated using nanoscale manufacturing techniques.</div>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-dot">🔋</div>
+        <div class="flow-text">
+          <div class="flow-label">Wireless Powering Integration</div>
+          <div class="flow-desc">Energy receptors integrated and validated for deep-tissue NIR / ultrasound power transfer without heating surrounding tissue.</div>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-dot">🧬</div>
+        <div class="flow-text">
+          <div class="flow-label">Micro-Reservoir Loading</div>
+          <div class="flow-desc">Reservoirs filled with specialised enzymatic agents that stimulate fat metabolism without causing cell lysis or toxicity.</div>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-dot">🫁</div>
+        <div class="flow-text">
+          <div class="flow-label">3D Tissue Culture Testing</div>
+          <div class="flow-desc">In-vitro testing verifies controlled chemical release, targeting precision, and zero toxicity to healthy surrounding tissue.</div>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-dot">🐁</div>
+        <div class="flow-text">
+          <div class="flow-label">Pre-Clinical Animal Trials</div>
+          <div class="flow-desc">Long-term biointegration, precise external activation, and zero toxicity confirmed through rigorous pre-clinical animal studies before human trials.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── OUTPUT ───── -->
+<section class="output-section">
+  <div class="container">
+    <div class="section-label">End Result</div>
+    <h2 class="section-title">What the body produces</h2>
+    <p class="section-sub">The biochemical breakdown converts fat into three completely natural byproducts — all safely metabolised by the body.</p>
+    <div class="output-cards">
+      <div class="output-card">
+        <div class="output-emoji">💨</div>
+        <div class="output-label">Carbon Dioxide (CO₂)</div>
+        <div class="output-desc">Exhaled through normal breathing. The same byproduct produced during natural exercise.</div>
+      </div>
+      <div class="output-card">
+        <div class="output-emoji">💧</div>
+        <div class="output-label">Water (H₂O)</div>
+        <div class="output-desc">Naturally excreted through sweat and urine. Completely harmless metabolic output.</div>
+      </div>
+      <div class="output-card">
+        <div class="output-emoji">⚡</div>
+        <div class="output-label">ATP Energy</div>
+        <div class="output-desc">Cellular energy currency released to surrounding healthy cells — a net benefit to the body.</div>
+      </div>
+      <div class="output-card">
+        <div class="output-emoji">🛡️</div>
+        <div class="output-label">Intact Healthy Tissue</div>
+        <div class="output-desc">Surrounding nerves, muscle fibres, and cells remain completely unharmed throughout the process.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── FOOTER ───── -->
+<footer>
+  <p>CAP-MED-V3 · Micro-Scale Robotic Capsule for Targeted, Non-Invasive Fat Breakdown</p>
+  <p style="margin-top:8px;opacity:0.5">Pre-clinical research concept · Not yet approved for human use</p>
+</footer>
+
+<style>
+  @keyframes capsuleDrop {
+    0% { transform: translateY(0); }
+    80% { transform: translateY(160px); opacity:1; }
+    100% { transform: translateY(170px); opacity:0; }
+  }
+</style>
+
+<script>
+  const steps = [0,1,2,3,4];
+  const svgSteps = steps.map(i => document.getElementById('step'+i));
+  const textSteps = steps.map(i => document.getElementById('sc'+i));
+  const buttons = document.querySelectorAll('.step-btn');
+
+  function showStep(idx) {
+    svgSteps.forEach((el,i) => el.style.display = i===idx ? '' : 'none');
+    textSteps.forEach((el,i) => {
+      el.classList.toggle('active', i===idx);
+      el.style.position = i===idx ? 'relative' : 'absolute';
+    });
+    buttons.forEach((b,i) => b.classList.toggle('active', i===idx));
+  }
+
+  // Auto-advance
+  let current = 0;
+  setInterval(() => {
+    current = (current+1) % 5;
+    showStep(current);
+  }, 4000);
+</script>
+
+</body>
+</html>
